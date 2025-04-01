@@ -1,0 +1,211 @@
+openapi: 3.0.3
+info:
+  title: Account Service API
+  description: API for managing bank accounts
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080/accounts
+    description: Local Development Server
+  - url: https://dev.api.bank.com/accounts
+    description: Development Server
+  - url: https://stage.api.bank.com/accounts
+    description: Staging Server
+  - url: https://api.bank.com/accounts
+    description: Production Server
+
+tags:
+  - name: Accounts
+    description: Operations To Manage Bank Accounts (Checking, Savings, Loans, etc.).
+
+paths:
+  /:
+    post:
+      summary: Create a new bank account
+      operationId: createAccount
+      tags:
+        - Accounts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccountRequest'
+      responses:
+        '201':
+          description: Account created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountResponse'
+        '400':
+          description: Invalid request
+
+  /{accountId}:
+    get:
+      summary: Get account details by ID
+      operationId: getAccount
+      tags:
+        - Accounts
+      parameters:
+        - name: accountId
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: "^[A-Z0-9]{10,20}$"
+      responses:
+        '200':
+          description: Account details retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountResponse'
+        '404':
+          description: Account not found
+
+    delete:
+      summary: Delete an account by ID
+      operationId: deleteAccount
+      tags:
+        - Accounts
+      parameters:
+        - name: accountId
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: "^[A-Z0-9]{10,20}$"
+      responses:
+        '204':
+          description: Account deleted successfully
+        '404':
+          description: Account not found
+
+    put:
+      summary: Update account information
+      operationId: updateAccount
+      tags:
+        - Accounts
+      parameters:
+        - name: accountId
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: "^[A-Z0-9]{10,20}$"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccountUpdateRequest'
+      responses:
+        '200':
+          description: Account updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountResponse'
+        '400':
+          description: Invalid request
+        '404':
+          description: Account not found
+
+  /{accountId}/status:
+    patch:
+      summary: Freeze or unfreeze an account
+      operationId: updateAccountStatus
+      tags:
+        - Accounts
+      parameters:
+        - name: accountId
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: "^[A-Z0-9]{10,20}$"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccountStatusUpdateRequest'
+      responses:
+        '200':
+          description: Account status updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountResponse'
+        '400':
+          description: Invalid request
+        '404':
+          description: Account not found
+
+components:
+  schemas:
+    AccountRequest:
+      type: object
+      required:
+        - accountHolderName
+        - accountType
+        - initialDeposit
+      properties:
+        accountHolderName:
+          type: string
+          minLength: 3
+          maxLength: 50
+          pattern: "^[A-Za-z ]+$"
+        accountType:
+          type: string
+          enum: [SAVINGS, CHECKING]
+        initialDeposit:
+          type: number
+          format: double
+          minimum: 100.0
+          maximum: 1000000.0
+
+    AccountResponse:
+      type: object
+      properties:
+        accountId:
+          type: string
+          example: "ACC1234567890"
+        accountHolderName:
+          type: string
+        accountType:
+          type: string
+          enum: [SAVINGS, CHECKING]
+        balance:
+          type: number
+          format: double
+        accountStatus:
+          type: string
+          enum: [ACTIVE, CLOSED, SUSPENDED]
+          description: Status of the account
+
+    AccountUpdateRequest:
+      type: object
+      properties:
+        accountHolderName:
+          type: string
+          minLength: 3
+          maxLength: 50
+          pattern: "^[A-Za-z ]+$"
+        accountType:
+          type: string
+          enum: [SAVINGS, CHECKING]
+        accountStatus:
+          type: string
+          enum: [ACTIVE, CLOSED, SUSPENDED]
+          description: Status of the account
+
+    AccountStatusUpdateRequest:
+      type: object
+      required:
+        - accountStatus
+      properties:
+        accountStatus:
+          type: string
+          enum: [ACTIVE, SUSPENDED]
+          description: Update account status to either ACTIVE or SUSPENDED

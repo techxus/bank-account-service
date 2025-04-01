@@ -1,0 +1,47 @@
+server:
+  servlet:
+    context-path: /account-service
+  port: 8080
+
+spring:
+  application:
+      name: account-service
+
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      schema: accounts  # Optional, but can be used to set the schema
+      pool-name: HikariPool-1  # Optional: Give a custom name to the connection pool
+      maximum-pool-size: 10    # Maximum number of connections in the pool (adjust as per your app load)
+      minimum-idle: 5         # Minimum number of idle connections in the pool
+      idle-timeout: 30000     # Maximum time that a connection can be idle before being removed from the pool
+      max-lifetime: 1800000   # Maximum lifetime of a connection in the pool (in ms)
+      connection-timeout: 30000  # Max time to wait for a connection from the pool before timing out
+      connection-test-query: SELECT 1  # Query to test connections, ensuring they are valid
+      leak-detection-threshold: 15000  # Log a warning if a connection is not returned in this time (in ms)
+      validation-timeout: 5000  # Timeout for connection validation before throwing an exception
+      auto-commit: false        # Whether to auto-commit transactions (set to false if you're using explicit transactions)
+
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: validate  # Hibernate will validate the schema against the current entity mappings.
+    properties:
+      hibernate:
+        show_sql: true
+        format_sql=: true
+        default_schema: accounts  # Set the default schema for Hibernate
+        hbm2ddl:
+          auto: validate  # Hibernate will validate the schema against the current entity mappings.
+
+  flyway:
+    baseline-on-migrate: true
+    locations: classpath:db/migration
+    default-schema: accounts
+    schemas: accounts
+
+logging:
+  level:
+    ROOT: INFO
+    com.techxus.bank: INFO
+    org.springframework.security: DEBUG

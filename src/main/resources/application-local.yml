@@ -1,0 +1,8 @@
+server:
+  port: 0
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/accounts
+    username: devuser
+    password: ipZna8t*TJ4Cy*sqquyH=
